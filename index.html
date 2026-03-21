@@ -3,125 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chrysalis Sports Day Meet 2026 Stemathon</title>
+    <title>Chrysalis Sports Day Meet 2026</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; display: flex; justify-content: center; padding: 20px; }
         .card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); width: 100%; max-width: 450px; text-align: center; }
-        input { width: 100%; padding: 15px; margin: 15px 0; border: 2px solid #e0e0e0; border-radius: 10px; box-sizing: border-box; font-size: 16px; transition: 0.3s; }
-        input:focus { border-color: #1a73e8; outline: none; }
-        .btn-search { width: 100%; padding: 15px; background: #1a73e8; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; }
-        .btn-checkin { width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 20px; font-size: 16px; }
+        input { width: 100%; padding: 15px; margin: 15px 0; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
+        .btn-search { width: 100%; padding: 15px; background: #1a73e8; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         
-        #result { display: none; margin-top: 25px; padding: 20px; border-radius: 12px; background: #ffffff; border: 1px solid #eee; text-align: left; }
-        .info-group { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0; }
-        .info-label { color: #70757a; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
-        .info-value { font-size: 1.2rem; font-weight: 600; color: #202124; margin-top: 4px; }
-        .zone-box { background: #e8f0fe; padding: 10px; border-radius: 8px; color: #1967d2; font-weight: bold; display: inline-block; margin-top: 5px; }
-        #statusMsg { margin-top: 15px; text-align: center; font-weight: bold; color: #28a745; }
+        #result { display: none; margin-top: 25px; text-align: left; background: #fff; padding: 15px; border: 1px solid #eee; border-radius: 10px; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #f9f9f9; padding-bottom: 5px; }
+        .label { color: #70757a; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
+        .value { color: #202124; font-weight: 600; }
+        
+        .zone-highlight { background: #e8f0fe; color: #1967d2; padding: 10px; border-radius: 8px; margin-top: 10px; font-weight: bold; text-align: center; }
+        .directions { font-size: 0.9rem; color: #5f6368; margin-top: 5px; font-style: italic; }
+        
+        .btn-checkin { width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 15px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2 style="margin-top:0;">🏆 STemathon</h2>
-    <p style="color: #5f6368;">Enter Student Name for Seating & Zone</p>
-    
-    <input type="text" id="studentSearch" placeholder="Type Full Name here...">
-    <button class="btn-search" onclick="fetchFromSheet()">Find My Location</button>
+    <h2>🏆 School Sports Day Stemathon</h2>
+    <p>Search by Roll No, Name, or Phone</p>
+    <input type="text" id="searchInput" placeholder="Enter details...">
+    <button class="btn-search" onclick="fetchStudent()">Search</button>
 
     <div id="result">
-        <div class="info-group">
-            <div class="info-label">Student Name</div>
-            <div id="resName" class="info-value"></div>
+        <div class="info-row">
+            <span class="label">Student:</span>
+            <span class="value" id="resName"></span>
+        </div>
+        <div class="info-row">
+            <span class="label">Roll No:</span>
+            <span class="value" id="resID"></span>
+        </div>
+        <div class="info-row">
+            <span class="label">Seating:</span>
+            <span class="value">Row <span id="resRow"></span>, Seat <span id="resSeat"></span></span>
+        </div>
+        <div class="info-row">
+            <span class="label">Current Status:</span>
+            <span class="value" id="resStatus" style="color: #d93025;">Not Checked In</span>
         </div>
 
-        <div style="display: flex; gap: 20px;" class="info-group">
-            <div style="flex: 1;">
-                <div class="info-label">Row</div>
-                <div id="resRow" class="info-value"></div>
-            </div>
-            <div style="flex: 1;">
-                <div class="info-label">Seat</div>
-                <div id="resSeat" class="info-value"></div>
-            </div>
+        <div class="zone-highlight">
+            Zone: <span id="resZone"></span>
         </div>
+        <div class="directions" id="resDirections"></div>
 
-        <div class="info-group">
-            <div class="info-label">Assigned Zone</div>
-            <div id="resZone" class="zone-box"></div>
-        </div>
-
-        <div class="info-group" style="border-bottom: none;">
-            <div class="info-label">Directions</div>
-            <div id="resDirections" class="info-value" style="font-size: 1rem; font-weight: normal; color: #5f6368;"></div>
-        </div>
-
-        <button id="checkInBtn" class="btn-checkin" onclick="doCheckIn()">Confirm My Arrival</button>
-        <div id="statusMsg"></div>
+        <button id="checkInBtn" class="btn-checkin" onclick="doCheckIn()">Confirm Arrival</button>
+        <p id="successMsg" style="display:none; color:#28a745; font-weight:bold; text-align:center; margin-top:10px;">✓ Check-in Complete!</p>
     </div>
 </div>
 
 <script>
-    // --- CONFIGURATION ---
-    const SPREADSHEET_ID = '1aI1pCUHF5zUvJGzVR_aSIfvYKQofbZnqYI0RBQNFMUw'; 
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyATX_XmXkF_q1yvVzbbIuG6WkY7oYsPEzBTE95n0y6yqhJPACMg2yn4sj-HAknbR_k/exec'; 
-    // ---------------------
+    const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID';
+    const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL';
+    const SHEET_NAME = 'Sheet1'; 
 
-    let currentStudent = "";
+    let activeID = "";
 
-    async function fetchFromSheet() {
-        const query = document.getElementById('studentSearch').value.trim().toLowerCase();
-        if (!query) return;
+    async function fetchStudent() {
+        const input = document.getElementById('searchInput').value.trim().toLowerCase();
+        if (!input) return;
 
-        // Note: Column indexes are 0=A, 1=B, 2=C, 4=E, 5=F
-        const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
+        const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}`;
         
         try {
             const response = await fetch(url);
             const text = await response.text();
             const json = JSON.parse(text.substr(47).slice(0, -2));
-            const student = json.table.rows.find(r => r.c[0] && r.c[0].v.toLowerCase() === query);
+            const rows = json.table.rows;
+
+            // Search Col A (ID), B (Name), or C (Phone)
+            const student = rows.find(r => 
+                (r.c[0] && r.c[0].v.toString().toLowerCase() === input) || 
+                (r.c[1] && r.c[1].v.toString().toLowerCase() === input) || 
+                (r.c[2] && r.c[2].v.toString().toLowerCase() === input)
+            );
 
             if (student) {
-                currentStudent = student.c[0].v;
+                activeID = student.c[0].v;
+                document.getElementById('resID').innerText = activeID;
+                document.getElementById('resName').innerText = student.c[1].v;
+                document.getElementById('resRow').innerText = student.c[3] ? student.c[3].v : "-";
+                document.getElementById('resSeat').innerText = student.c[4] ? student.c[4].v : "-";
                 
-                // Set text values
-                document.getElementById('resName').innerText = currentStudent;
-                document.getElementById('resRow').innerText = student.c[1] ? student.c[1].v : "N/A";
-                document.getElementById('resSeat').innerText = student.c[2] ? student.c[2].v : "N/A";
-                document.getElementById('resZone').innerText = student.c[4] ? student.c[4].v : "General";
-                document.getElementById('resDirections').innerText = student.c[5] ? student.c[5].v : "Follow main signs.";
-                
-                // Show result & reset button
+                // Status (Col F / Index 5)
+                const status = student.c[5] ? student.c[5].v : "Not Checked In";
+                document.getElementById('resStatus').innerText = status;
+                document.getElementById('resStatus').style.color = status.includes("Arrived") ? "#28a745" : "#d93025";
+
+                document.getElementById('resZone').innerText = student.c[6] ? student.c[6].v : "General";
+                document.getElementById('resDirections').innerText = student.c[7] ? student.c[7].v : "";
+
                 document.getElementById('result').style.display = 'block';
-                document.getElementById('statusMsg').innerText = "";
-                document.getElementById('checkInBtn').style.display = 'block';
-                document.getElementById('checkInBtn').disabled = false;
+                document.getElementById('checkInBtn').style.display = status.includes("Arrived") ? 'none' : 'block';
+                document.getElementById('successMsg').style.display = 'none';
             } else {
-                alert("Name not found. Please try again or visit the help desk.");
+                alert("Student not found.");
             }
-        } catch (e) { 
-            console.error(e);
-            alert("Connection error. Check your internet or Spreadsheet ID."); 
-        }
+        } catch (e) { alert("Error loading data."); }
     }
 
     async function doCheckIn() {
         const btn = document.getElementById('checkInBtn');
-        btn.innerText = "Processing...";
+        btn.innerText = "Checking in...";
         btn.disabled = true;
 
         try {
-            // Sends name to Google Apps Script
-            await fetch(`${APPS_SCRIPT_URL}?name=${encodeURIComponent(currentStudent)}`, { mode: 'no-cors' });
-            document.getElementById('statusMsg').innerText = "✓ Welcome! You are checked in.";
+            await fetch(`${APPS_SCRIPT_URL}?id=${activeID}`, { mode: 'no-cors' });
+            document.getElementById('resStatus').innerText = "Arrived (Just Now)";
+            document.getElementById('resStatus').style.color = "#28a745";
+            document.getElementById('successMsg').style.display = 'block';
             btn.style.display = 'none';
         } catch (e) {
-            alert("Check-in failed. Please contact staff.");
+            alert("Check-in failed.");
             btn.disabled = false;
         }
     }
 </script>
-
 </body>
 </html>
