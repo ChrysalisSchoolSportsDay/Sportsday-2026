@@ -5,87 +5,119 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sports Day Check-In</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; max-width: 400px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .btn-search { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .btn-checkin { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 15px; }
-        #result { display: none; margin-top: 25px; padding: 20px; border-radius: 10px; background: #e8f0fe; }
-        .info-label { color: #5f6368; font-size: 0.9rem; margin-bottom: 5px; }
-        .info-value { font-size: 1.4rem; font-weight: bold; color: #202124; margin-bottom: 15px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); width: 100%; max-width: 450px; text-align: center; }
+        input { width: 100%; padding: 15px; margin: 15px 0; border: 2px solid #e0e0e0; border-radius: 10px; box-sizing: border-box; font-size: 16px; transition: 0.3s; }
+        input:focus { border-color: #1a73e8; outline: none; }
+        .btn-search { width: 100%; padding: 15px; background: #1a73e8; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; }
+        .btn-checkin { width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 20px; font-size: 16px; }
+        
+        #result { display: none; margin-top: 25px; padding: 20px; border-radius: 12px; background: #ffffff; border: 1px solid #eee; text-align: left; }
+        .info-group { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0; }
+        .info-label { color: #70757a; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
+        .info-value { font-size: 1.2rem; font-weight: 600; color: #202124; margin-top: 4px; }
+        .zone-box { background: #e8f0fe; padding: 10px; border-radius: 8px; color: #1967d2; font-weight: bold; display: inline-block; margin-top: 5px; }
+        #statusMsg { margin-top: 15px; text-align: center; font-weight: bold; color: #28a745; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>🏆 Sports Day Entry</h2>
-    <input type="text" id="studentSearch" placeholder="Enter Student Name...">
-    <button class="btn-search" onclick="fetchFromSheet()">Find Seating</button>
+    <h2 style="margin-top:0;">🏆 Sports Day 2026</h2>
+    <p style="color: #5f6368;">Enter Student Name for Seating & Zone</p>
+    
+    <input type="text" id="studentSearch" placeholder="Type Full Name here...">
+    <button class="btn-search" onclick="fetchFromSheet()">Find My Location</button>
 
     <div id="result">
-        <div class="info-label">STUDENT</div>
-        <div class="info-value" id="resName"></div>
-        
-        <div style="display: flex; justify-content: space-around;">
-            <div>
-                <div class="info-label">ROW</div>
-                <div class="info-value" id="resRow"></div>
+        <div class="info-group">
+            <div class="info-label">Student Name</div>
+            <div id="resName" class="info-value"></div>
+        </div>
+
+        <div style="display: flex; gap: 20px;" class="info-group">
+            <div style="flex: 1;">
+                <div class="info-label">Row</div>
+                <div id="resRow" class="info-value"></div>
             </div>
-            <div>
-                <div class="info-label">SEAT</div>
-                <div class="info-value" id="resSeat"></div>
+            <div style="flex: 1;">
+                <div class="info-label">Seat</div>
+                <div id="resSeat" class="info-value"></div>
             </div>
         </div>
 
-        <button id="checkInBtn" class="btn-checkin" onclick="doCheckIn()">Confirm Arrival / Check-In</button>
-        <p id="statusMsg" style="margin-top:10px; font-weight:bold; color:#28a745;"></p>
+        <div class="info-group">
+            <div class="info-label">Assigned Zone</div>
+            <div id="resZone" class="zone-box"></div>
+        </div>
+
+        <div class="info-group" style="border-bottom: none;">
+            <div class="info-label">Directions</div>
+            <div id="resDirections" class="info-value" style="font-size: 1rem; font-weight: normal; color: #5f6368;"></div>
+        </div>
+
+        <button id="checkInBtn" class="btn-checkin" onclick="doCheckIn()">Confirm My Arrival</button>
+        <div id="statusMsg"></div>
     </div>
 </div>
 
 <script>
-    const SPREADSHEET_ID = '1aI1pCUHF5zUvJGzVR_aSIfvYKQofbZnqYI0RBQNFMUw'; // Replace this
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzFK6Nn_Lnbwodn2LRYlypfQJxLxSktb_hGzOYACv12pgwreALJwBtMifg29-cBMZzj/exec'; // Replace with URL from Step 1
-    
+    // --- CONFIGURATION ---
+    const SPREADSHEET_ID = '1aI1pCUHF5zUvJGzVR_aSIfvYKQofbZnqYI0RBQNFMUw'; 
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxa42k9lCV_GOEY5vrUu6qcXsVZwDQ8bQiisy60LslveY96zQD7jz1X5XUQsXSYKLF6/exec'; 
+    // ---------------------
+
     let currentStudent = "";
 
     async function fetchFromSheet() {
         const query = document.getElementById('studentSearch').value.trim().toLowerCase();
         if (!query) return;
 
+        // Note: Column indexes are 0=A, 1=B, 2=C, 4=E, 5=F
         const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
         
         try {
             const response = await fetch(url);
             const text = await response.text();
             const json = JSON.parse(text.substr(47).slice(0, -2));
-            const student = json.table.rows.find(r => r.c[0].v.toLowerCase() === query);
+            const student = json.table.rows.find(r => r.c[0] && r.c[0].v.toLowerCase() === query);
 
             if (student) {
                 currentStudent = student.c[0].v;
+                
+                // Set text values
                 document.getElementById('resName').innerText = currentStudent;
-                document.getElementById('resRow').innerText = student.c[1].v;
-                document.getElementById('resSeat').innerText = student.c[2].v;
+                document.getElementById('resRow').innerText = student.c[1] ? student.c[1].v : "N/A";
+                document.getElementById('resSeat').innerText = student.c[2] ? student.c[2].v : "N/A";
+                document.getElementById('resZone').innerText = student.c[4] ? student.c[4].v : "General";
+                document.getElementById('resDirections').innerText = student.c[5] ? student.c[5].v : "Follow main signs.";
+                
+                // Show result & reset button
                 document.getElementById('result').style.display = 'block';
                 document.getElementById('statusMsg').innerText = "";
+                document.getElementById('checkInBtn').style.display = 'block';
                 document.getElementById('checkInBtn').disabled = false;
-                document.getElementById('checkInBtn').innerText = "Confirm Arrival / Check-In";
             } else {
-                alert("Name not found.");
+                alert("Name not found. Please try again or visit the help desk.");
             }
-        } catch (e) { alert("Error loading data."); }
+        } catch (e) { 
+            console.error(e);
+            alert("Connection error. Check your internet or Spreadsheet ID."); 
+        }
     }
 
     async function doCheckIn() {
         const btn = document.getElementById('checkInBtn');
-        btn.innerText = "Checking in...";
+        btn.innerText = "Processing...";
         btn.disabled = true;
 
         try {
+            // Sends name to Google Apps Script
             await fetch(`${APPS_SCRIPT_URL}?name=${encodeURIComponent(currentStudent)}`, { mode: 'no-cors' });
-            document.getElementById('statusMsg').innerText = "✓ Checked In Successfully!";
+            document.getElementById('statusMsg').innerText = "✓ Welcome! You are checked in.";
             btn.style.display = 'none';
         } catch (e) {
-            alert("Check-in failed. Please tell a staff member.");
+            alert("Check-in failed. Please contact staff.");
             btn.disabled = false;
         }
     }
