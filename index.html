@@ -3,81 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Sports Day Portal</title>
+    <title>Sports Day Check-In</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        #loader { display: none; margin-top: 10px; color: #666; }
-        #result { display: none; margin-top: 20px; padding: 15px; border: 2px solid #e8f0fe; border-radius: 8px; }
-        .qr-area img { margin-top: 15px; border: 5px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; max-width: 400px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .btn-search { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-checkin { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 15px; }
+        #result { display: none; margin-top: 25px; padding: 20px; border-radius: 10px; background: #e8f0fe; }
+        .info-label { color: #5f6368; font-size: 0.9rem; margin-bottom: 5px; }
+        .info-value { font-size: 1.4rem; font-weight: bold; color: #202124; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>🏅 Seating Finder</h2>
-    <p>Search by Student's Full Name</p>
-    <input type="text" id="studentSearch" placeholder="Enter name...">
-    <button onclick="fetchFromSheet()">Search Database</button>
-    <div id="loader">Searching live records...</div>
+    <h2>🏆 Sports Day Entry</h2>
+    <input type="text" id="studentSearch" placeholder="Enter Student Name...">
+    <button class="btn-search" onclick="fetchFromSheet()">Find Seating</button>
 
     <div id="result">
-        <h3 id="resName"></h3>
-        <p><strong>Row:</strong> <span id="resRow"></span> | <strong>Seat:</strong> <span id="resSeat"></span></p>
-        <div class="qr-area" id="resQR"></div>
+        <div class="info-label">STUDENT</div>
+        <div class="info-value" id="resName"></div>
+        
+        <div style="display: flex; justify-content: space-around;">
+            <div>
+                <div class="info-label">ROW</div>
+                <div class="info-value" id="resRow"></div>
+            </div>
+            <div>
+                <div class="info-label">SEAT</div>
+                <div class="info-value" id="resSeat"></div>
+            </div>
+        </div>
+
+        <button id="checkInBtn" class="btn-checkin" onclick="doCheckIn()">Confirm Arrival / Check-In</button>
+        <p id="statusMsg" style="margin-top:10px; font-weight:bold; color:#28a745;"></p>
     </div>
 </div>
 
 <script>
-    // REPLACE THIS URL with your Spreadsheet ID
-    const SPREADSHEET_ID = '1t-z1_e6MQJDrIVG1Ooq3RAUeoFvxjIxPKtcbAWkjNNo';
-    const TAB_NAME = 'Sheet1'; 
-    const DATA_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${TAB_NAME}`;
+    const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID'; // Replace this
+    const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL'; // Replace with URL from Step 1
+    
+    let currentStudent = "";
 
     async function fetchFromSheet() {
         const query = document.getElementById('studentSearch').value.trim().toLowerCase();
-        const loader = document.getElementById('loader');
-        const resultDiv = document.getElementById('result');
+        if (!query) return;
 
-        if (!query) return alert("Please enter a name");
-
-        loader.style.display = 'block';
-        resultDiv.style.display = 'none';
-
+        const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
+        
         try {
-            const response = await fetch(DATA_URL);
+            const response = await fetch(url);
             const text = await response.text();
-            // Clean up Google's JSON response
             const json = JSON.parse(text.substr(47).slice(0, -2));
-            const rows = json.table.rows;
-
-            // Search logic
-            const student = rows.find(r => r.c[0].v.toLowerCase() === query);
+            const student = json.table.rows.find(r => r.c[0].v.toLowerCase() === query);
 
             if (student) {
-                const name = student.c[0].v;
-                const row = student.c[1].v;
-                const seat = student.c[2].v;
-
-                document.getElementById('resName').innerText = name;
-                document.getElementById('resRow').innerText = row;
-                document.getElementById('resSeat').innerText = seat;
-
-                // QR Generation
-                const qrContent = encodeURIComponent(`Verified: ${name} | Row ${row} Seat ${seat}`);
-                document.getElementById('resQR').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrContent}">`;
-                
-                resultDiv.style.display = 'block';
+                currentStudent = student.c[0].v;
+                document.getElementById('resName').innerText = currentStudent;
+                document.getElementById('resRow').innerText = student.c[1].v;
+                document.getElementById('resSeat').innerText = student.c[2].v;
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('statusMsg').innerText = "";
+                document.getElementById('checkInBtn').disabled = false;
+                document.getElementById('checkInBtn').innerText = "Confirm Arrival / Check-In";
             } else {
-                alert("Student not found. Check spelling or contact the front desk.");
+                alert("Name not found.");
             }
-        } catch (error) {
-            console.error(error);
-            alert("Error connecting to database.");
-        } finally {
-            loader.style.display = 'none';
+        } catch (e) { alert("Error loading data."); }
+    }
+
+    async function doCheckIn() {
+        const btn = document.getElementById('checkInBtn');
+        btn.innerText = "Checking in...";
+        btn.disabled = true;
+
+        try {
+            await fetch(`${APPS_SCRIPT_URL}?name=${encodeURIComponent(currentStudent)}`, { mode: 'no-cors' });
+            document.getElementById('statusMsg').innerText = "✓ Checked In Successfully!";
+            btn.style.display = 'none';
+        } catch (e) {
+            alert("Check-in failed. Please tell a staff member.");
+            btn.disabled = false;
         }
     }
 </script>
