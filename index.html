@@ -28,6 +28,17 @@
     font-style: italic;  /* Makes it look like a hint */
     font-weight: normal; /* Ensures it isn't bold */
 }
+
+        .search-hint {
+    color: #8e9196;
+    font-size: 0.75rem;       /* Small font size */
+    margin-bottom: 15px;
+    white-space: nowrap;      /* Forces it into one line */
+    overflow: hidden;         /* Hides any overflow if the screen is tiny */
+    text-overflow: ellipsis;  /* Adds '...' if the screen is too small */
+    letter-spacing: -0.2px;   /* Slightly tighter for better fit */
+    font-weight: 400;
+}
     </style>
 </head>
 <body>
@@ -35,7 +46,7 @@
 <div class="card">
        
     <h2>🏆 Sports Day Stemathon</h2>
-    <p style="color: #65676b; margin-bottom: 20px;">Enter an ID, Student Name, or Phone to find your Zone and Directions</p>
+    <p class="search-hint">Enter an ID, Name, or Phone to find your Zone and Directions</p>
     <p class="helper-text">Eg: FName LName or 9xxxxxxxxx</p>
     <input type="text" id="searchInput" placeholder="ID, Name, or Phone...">
     <button class="btn-search" onclick="fetchStudent()">Search</button>
