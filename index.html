@@ -5,10 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chrysalis Sports Day Meet 2026</title>
     <style>
-        /* Global Fix: Ensures padding doesn't break widths */
+        /* Global Reset to prevent width issues */
         * { box-sizing: border-box; }
 
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; display: flex; justify-content: center; padding: 15px; margin: 0; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: #f0f4f8; 
+            display: flex; 
+            justify-content: center; 
+            padding: 15px; /* Margin around the card on mobile */
+            margin: 0; 
+        }
         
         .card { 
             background: white; 
@@ -17,21 +24,20 @@
             box-shadow: 0 8px 30px rgba(0,0,0,0.1); 
             width: 100%; 
             max-width: 450px; 
-            text-align: center; 
+            text-align: center;
+            overflow: hidden; /* Keeps everything inside the rounded corners */
         }
-
-        #schoolLogo { width: 80px; height: auto; margin-bottom: 10px; object-fit: contain; }
 
         h2 { font-size: 1.4rem; margin-top: 10px; color: #1a202c; }
 
         .search-hint {
             color: #70757a;
-            font-size: 0.85rem; /* Slightly smaller for mobile */
+            font-size: 0.85rem;
             margin-bottom: 8px;
             line-height: 1.4;
             display: block;
-            padding: 0 5px;
-            /* REMOVED white-space: nowrap to allow wrapping */
+            padding: 0 10px;
+            /* FIXED: Removed white-space: nowrap to allow the text to wrap on mobile */
         }
 
         .search-hint b { color: #444; font-weight: 700; }
@@ -51,7 +57,7 @@
             border: 2px solid #ddd; 
             border-radius: 10px; 
             font-size: 16px; 
-            appearance: none; /* Fixes iOS zoom issues */
+            appearance: none; /* Prevents iOS specific input styling issues */
         }
 
         .btn-search { 
@@ -66,15 +72,66 @@
             font-size: 1rem;
         }
         
-        #result { display: none; margin-top: 25px; text-align: left; background: #fff; padding: 15px; border: 1px solid #eee; border-radius: 10px; }
-        .info-row { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #f9f9f9; padding-bottom: 5px; }
+        #result { 
+            display: none; 
+            margin-top: 25px; 
+            text-align: left; 
+            background: #fff; 
+            padding: 15px; 
+            border: 1px solid #eee; 
+            border-radius: 10px; 
+        }
+
+        .info-row { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 10px; 
+            border-bottom: 1px solid #f9f9f9; 
+            padding-bottom: 5px; 
+            align-items: center; /* Keeps label and value aligned */
+        }
+
         .label { color: #70757a; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
-        .value { color: #202124; font-weight: 600; text-align: right; margin-left: 10px; }
         
-        .zone-highlight { background: #e8f0fe; color: #1967d2; padding: 12px; border-radius: 8px; margin-top: 10px; font-weight: bold; text-align: center; font-size: 1.1rem; }
-        .directions { font-size: 0.85rem; color: #5f6368; margin-top: 8px; font-style: italic; text-align: center; }
+        .value { 
+            color: #202124; 
+            font-weight: 600; 
+            text-align: right; 
+            word-break: break-word; /* Prevents long names from breaking the layout */
+            margin-left: 10px;
+        }
         
-        .btn-checkin { width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 15px; }
+        .zone-highlight { 
+            background: #e8f0fe; 
+            color: #1967d2; 
+            padding: 12px; 
+            border-radius: 8px; 
+            margin-top: 10px; 
+            font-weight: bold; 
+            text-align: center; 
+            font-size: 1.1rem; 
+        }
+
+        .directions { 
+            font-size: 0.85rem; 
+            color: #5f6368; 
+            margin-top: 8px; 
+            font-style: italic; 
+            text-align: center; 
+            line-height: 1.4;
+        }
+        
+        .btn-checkin { 
+            width: 100%; 
+            padding: 15px; 
+            background: #28a745; 
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            margin-top: 15px; 
+        }
     </style>
 </head>
 <body>
@@ -83,10 +140,9 @@
     <h2>🏆 Sports Day Stemathon</h2>
     
     <p class="search-hint">Enter <b>ID</b>, <b>Name</b>, or <b>Phone</b> to find your Zone and Directions</p>
-    
     <p class="helper-text">Eg: FName LName or 9xxxxxxxxx</p>
     
-    <input type="text" id="searchInput" placeholder="Search here...">
+    <input type="text" id="searchInput" placeholder="Search details here...">
     <button class="btn-search" onclick="fetchStudent()">Search</button>
 
     <div id="result">
@@ -118,7 +174,6 @@
 </div>
 
 <script>
-    // Your existing script remains the same
     const SPREADSHEET_ID = '1aI1pCUHF5zUvJGzVR_aSIfvYKQofbZnqYI0RBQNFMUw';
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwad8UMEcm5EUkTXILZJdJsYfLHJUXq6lZI9ydnJmdy0uU9nVd3Vte9_dxNk_FhBngO/exec';
     const SHEET_NAME = 'Sheet1'; 
