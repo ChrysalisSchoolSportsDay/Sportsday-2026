@@ -1,65 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chrysalis Sports Day Meet 2026</title>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); width: 100%; max-width: 450px; text-align: center; }
-        input { width: 100%; padding: 15px; margin: 15px 0; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
-        .btn-search { width: 100%; padding: 15px; background: #1a73e8; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        
-        #result { display: none; margin-top: 25px; text-align: left; background: #fff; padding: 15px; border: 1px solid #eee; border-radius: 10px; }
-        .info-row { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #f9f9f9; padding-bottom: 5px; }
-        .label { color: #70757a; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
-        .value { color: #202124; font-weight: 600; }
-        
-        .zone-highlight { background: #e8f0fe; color: #1967d2; padding: 10px; border-radius: 8px; margin-top: 10px; font-weight: bold; text-align: center; }
-        .directions { font-size: 0.9rem; color: #5f6368; margin-top: 5px; font-style: italic; }
-        
-        .btn-checkin { width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 15px; }
-    </style>
-</head>
-<body>
-
-<div class="card">
-    <h2>🏆 School Sports Day Stemathon</h2>
-    <p style="color: #65676b; margin-bottom: 20px;">Please enter a ID, Student Name, or Contact Number to proceed.</p>
-    <input type="text" id="searchInput" placeholder="Enter details...">
-    <button class="btn-search" onclick="fetchStudent()">Search</button>
-
-    <div id="result">
-        <div class="info-row">
-            <span class="label">Student:</span>
-            <span class="value" id="resName"></span>
-        </div>
-        <div class="info-row">
-            <span class="label">Roll No:</span>
-            <span class="value" id="resID"></span>
-        </div>
-        <div class="info-row">
-            <span class="label">Seating:</span>
-            <span class="value">Row <span id="resRow"></span>, Seat <span id="resSeat"></span></span>
-        </div>
-        <div class="info-row">
-            <span class="label">Current Status:</span>
-            <span class="value" id="resStatus" style="color: #d93025;">Not Checked In</span>
-        </div>
-
-        <div class="zone-highlight">
-            Zone: <span id="resZone"></span>
-        </div>
-        <div class="directions" id="resDirections"></div>
-
-        <button id="checkInBtn" class="btn-checkin" onclick="doCheckIn()">Confirm Arrival</button>
-        <p id="successMsg" style="display:none; color:#28a745; font-weight:bold; text-align:center; margin-top:10px;">✓ Check-in Complete!</p>
-    </div>
-</div>
-
 <script>
-    const SPREADSHEET_ID = '1aI1pCUHF5zUvJGzVR_aSIfvYKQofbZnqYI0RBQNFMUw';
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhEAsinvhAQpuggGMeyuzpKDj3kdJeTs37tY9WqspOWGqIxmKsNuDHcJ4LTohirjUQ/exec';
+    const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID';
+    const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL';
     const SHEET_NAME = 'Sheet1'; 
 
     let activeID = "";
@@ -76,35 +17,38 @@
             const json = JSON.parse(text.substr(47).slice(0, -2));
             const rows = json.table.rows;
 
-            // Search Col A (ID), B (Name), or C (Phone)
+            // QUADRUPLE SEARCH LOGIC: Check Col A, B, C, or D
             const student = rows.find(r => 
-                (r.c[0] && r.c[0].v.toString().toLowerCase() === input) || 
-                (r.c[1] && r.c[1].v.toString().toLowerCase() === input) || 
-                (r.c[2] && r.c[2].v.toString().toLowerCase() === input)
+                (r.c[0] && r.c[0].v.toString().toLowerCase() === input) || // Roll No (A)
+                (r.c[1] && r.c[1].v.toString().toLowerCase() === input) || // Name (B)
+                (r.c[2] && r.c[2].v.toString().toLowerCase() === input) || // Phone 1 (C)
+                (r.c[3] && r.c[3].v.toString().toLowerCase() === input)    // Phone 2 (D)
             );
 
             if (student) {
                 activeID = student.c[0].v;
                 document.getElementById('resID').innerText = activeID;
                 document.getElementById('resName').innerText = student.c[1].v;
-                document.getElementById('resRow').innerText = student.c[3] ? student.c[3].v : "-";
-                document.getElementById('resSeat').innerText = student.c[4] ? student.c[4].v : "-";
                 
-                // Status (Col F / Index 5)
-                const status = student.c[5] ? student.c[5].v : "Not Checked In";
+                // UPDATED INDEXES (A=0, B=1, C=2, D=3, E=4, F=5, G=6, H=7, I=8)
+                document.getElementById('resRow').innerText = student.c[4] ? student.c[4].v : "-";
+                document.getElementById('resSeat').innerText = student.c[5] ? student.c[5].v : "-";
+                
+                // Status (Col G / Index 6)
+                const status = student.c[6] ? student.c[6].v : "Not Checked In";
                 document.getElementById('resStatus').innerText = status;
                 document.getElementById('resStatus').style.color = status.includes("Arrived") ? "#28a745" : "#d93025";
 
-                document.getElementById('resZone').innerText = student.c[6] ? student.c[6].v : "General";
-                document.getElementById('resDirections').innerText = student.c[7] ? student.c[7].v : "";
+                // Zone (Col H / Index 7) and Directions (Col I / Index 8)
+                document.getElementById('resZone').innerText = student.c[7] ? student.c[7].v : "General";
+                document.getElementById('resDirections').innerText = student.c[8] ? student.c[8].v : "";
 
                 document.getElementById('result').style.display = 'block';
                 document.getElementById('checkInBtn').style.display = status.includes("Arrived") ? 'none' : 'block';
-                document.getElementById('successMsg').style.display = 'none';
             } else {
-                alert("Student not found.");
+                alert("No record found. Please check the ID, Name, or Phone Number.");
             }
-        } catch (e) { alert("Error loading data."); }
+        } catch (e) { alert("Error loading data. Check your Spreadsheet ID."); }
     }
 
     async function doCheckIn() {
@@ -113,16 +57,11 @@
         btn.disabled = true;
 
         try {
+            // Sends the unique ID to the script
             await fetch(`${APPS_SCRIPT_URL}?id=${activeID}`, { mode: 'no-cors' });
-            document.getElementById('resStatus').innerText = "Arrived (Just Now)";
+            document.getElementById('resStatus').innerText = "Arrived (Success)";
             document.getElementById('resStatus').style.color = "#28a745";
-            document.getElementById('successMsg').style.display = 'block';
             btn.style.display = 'none';
-        } catch (e) {
-            alert("Check-in failed.");
-            btn.disabled = false;
-        }
+        } catch (e) { alert("Check-in failed."); btn.disabled = false; }
     }
 </script>
-</body>
-</html>
